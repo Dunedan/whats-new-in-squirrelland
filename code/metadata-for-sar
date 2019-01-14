@@ -1,0 +1,8 @@
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: squirrelland-hello-world
+    Description: hello world
+    Author: A little squirrel
+    SpdxLicenseId: MIT
+    LicenseUrl: ./LICENSE
+    SemanticVersion: 0.0.1

@@ -1,0 +1,400 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>What's new in Squirrelland?</title>
+
+		<link rel="icon" href="/images/favicon.png" type="image/png">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		
+		<link rel="stylesheet" type="text/css" href="css/asciinema-player.css" />
+		<script src="js/asciinema-player.js"></script>
+		
+		<style type="text/css">
+			.reveal {
+				background: #FFE5B4;
+			}
+		
+			.reveal h1 {
+				font-size: 2.2em;
+				text-transform: none;
+			}
+			
+			.reveal h2 {
+				font-size: 1.8em;
+				margin-bottom: 1em;
+				text-transform: none;
+
+			}
+			
+			.reveal h2.monospace {
+				font-size: 1.6em;
+				background: inherit;
+			}
+		
+			.reveal h3 {
+				font-size: 1.5em;
+			}
+
+			.reveal pre {
+				font-size: 0.65em;
+			}
+			
+			.reveal pre code {
+				padding: 0.5em;
+			}
+			
+			.reveal pre code.much-code {
+				max-height: 600px;
+				line-height: 1.1em;
+			}
+			
+			.reveal .monospace {
+				font-family: "Monaco", monospace;
+				font-size: 0.9em;
+				padding: 0 0.1em;
+				background: rgba(0, 0, 0, 0.05);
+			}
+			
+			.reveal li {
+				margin:2rem 0;
+			}
+			
+			.reveal section img {
+				border:0;
+				padding:0 0em;
+				margin:0 0 0.5rem 0;
+				background:inherit;
+			}
+			
+			.reveal .sam-cli-box {
+				border:2px solid;
+				padding: 0.5em;
+				border-radius: 0.5em;
+				margin-left:0.5em;
+				margin-right:0.5em;
+				display:inline-block;
+			}
+			
+			.reveal #sam-cli-slide p, .reveal #sam-cli-slide-dupl p {
+				text-align:center;
+				margin:0.35em;
+				font-size:0.6em;
+			}
+			
+			.reveal #sam-resource-types .monospace {
+				background: inherit;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>What's new in Squirrelland?</h1>
+					<img src="images/SAM2.png" style="box-shadow:none;padding:1em;" width="60%">
+					<aside class="notes">
+						Before we start:
+						<ul>
+							<li>Hi, I'm Daniel, I'm building Serverless applications on AWS</li>
+							<li>I'm going to talk about what's new in AWS SAM</li>
+							<li>This is a follow up to the SAM talk I gave last May.</li>
+							<li>If you have questions, just ask!</li>
+						</ul>
+				</section>
+				<section>
+					<h2>What's SAM?</h2>
+					<div style="display:flex;">
+					<ul>
+						<li><a href="https://github.com/awslabs/serverless-application-model">Serverless Application Model</a>
+						<ul>
+							<li>AWS-provided CloudFormation Macro</li>
+							<li>Provides additional CloudFormation-like resources</li>
+							<li>Meant to ease development of serverless applications</li>
+						</ul>
+						<li><a href="https://github.com/awslabs/aws-sam-cli">AWS SAM CLI</a> to automate manual steps around testing and deployment</li>
+						<li>(<a href="https://aws.amazon.com/serverless/serverlessrepo/">Serverless Application Repository (SAR)</a>)</li>
+					</ul>
+					<img src="images/SAM_hardhat.png" style="box-shadow:none;padding:1em;" width="30%" height="30%">
+					</div>
+				</section>
+				<section id="sam-resource-types">
+					<h2>SAM resource types</h2>
+					<ul>
+						<li class="monospace">AWS::Serverless::Function</li>
+						<li class="monospace">AWS::Serverless::Api</li>
+						<li class="monospace">AWS::Serverless::SimpleTable</li>
+						<li class="monospace">AWS::Serverless::Application 🆕</li>
+						<li class="monospace">AWS::Serverless::LayerVersion 🆕</li>
+						
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li><span class="monospace">AWS::Serverless::Function</span> got support for:
+								<ul>
+									<li>AWS Lambda Layers</li>
+									<li>SQS as event source</li>
+									<li>specifying code inline (inline code not supported yet by <span class="monospace">sam local</span>.</li>
+								</ul>
+							</li>
+							<li><span class="monospace">AWS::Serverless::Api</span> got support for API Gateway Authorizers</li>
+							<li><span class="monospace">AWS::Serverless::SimpleTable</span> switches to use DynamoDB on-demand with the next release.</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2 class="monospace">AWS::Serverless::Application</h2>
+					<ul>
+						<li>Embeds an application from AWS SAR or another SAM application as nested stack</li>
+					</ul>
+					<pre><code class="much-code line-numbers" style="font-size: 0.8em; width: 110%">Resources:
+  MySAMApp:
+    Type: AWS::Serverless::Application
+    Properties:
+      ApplicationId: 'arn:aws:serverlessrepo:us-east-1:012345678901:applications/demo'
+      SemanticVersion: 1.0.0
+  Outputs:
+    SampleOutput:
+      Description: Example for using an output value of the embedded SAR application
+      Value: !GetAtt MySAMApp.Outputs.SampleOutputValue</code></pre>
+					<aside class="notes">
+						<ul>
+							<li>Instead of specifying an SAR application, specifying a SAM template is possible as well.</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2 class="monospace">AWS::Serverless::LayerVersion</h2>
+					<ul>
+						<li>Wrapper around <span class="monospace">AWS::Lambda::LayerVersion</span></li>
+						<li>Differences:
+							<ul>
+								<li>Integration with <span class="monospace">sam package</span> for packaging the content</li>
+								<li>Allows to keep old layer versions when updating (<span class="monospace">RetentionPolicy: Retain</span>)</li>
+							</ul>
+						</li>
+					</ul>
+					<pre><code class="much-code line-numbers">MyLayer:
+  Type: AWS::Serverless::LayerVersion
+  Properties:
+    LayerName: MyLayer
+    Description: Layer description
+    ContentUri: ./path_to_my_layer/
+    CompatibleRuntimes:
+      - python3.6
+      - python3.7
+    LicenseInfo: Available under the MIT-0 license.
+    RetentionPolicy: Retain</code></pre>
+  					<aside class="notes">
+						<ul>
+							<li><span class="monospace">AWS::Lambda::LayerVersion</span> only allows S3 objects as source.</li>
+						</ul>
+					</aside>
+				</section>
+				<section id="sam-cli-slide">
+					<h2>AWS SAM CLI</h2>
+						<p><span class="monospace sam-cli-box">sam init</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam validate</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam build 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam local invoke</span><span class="monospace sam-cli-box">sam local start-api</span><span class="monospace sam-cli-box">sam local start-lambda 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam package</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam deploy</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam logs 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam publish 🆕</span></p>
+					<aside class="notes">
+						<ul>
+							<li>Offers various commands</li>
+							<li>Originally just aliases for the same functionality in AWS CLI, nowadays more functionality</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2 class="monospace">sam build</h2>
+					<ul>
+						<li>Builds artifacts from source code</li>
+						<li>Can replace custom build scripts</li>
+						<li>Opinionated approach, e.g. for Python currently only pip with <span class="monospace">requirements.txt</span> supported
+						<li>Currently supports NodeJS/npm, Python/pip, Ruby/Bundler</li>
+						<li>In the pipeline: Go/Go Modules, Go/Dep, Java/Gradle and Rust/Cargo</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>Still young project, so some rough edges</li>
+							<li>Developed as Open Source, so adding new builders is easy</li>
+							<li>Currently build one artifact per CodeUri, even if the CodeUri is the same</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2 class="monospace">sam local start-lambda</h2>
+					<ul>
+						<li>Starts a AWS Lambda container, which can be invoked by regular AWS API calls</li>
+						<li>Useful for using the same tests against a local Lambda function and one hosted at AWS</li>
+					</ul>
+					<pre><code>$ sam local start-lambda
+$ aws lambda invoke --endpoint-url http://127.0.0.1:3001 \
+                    --function-name YourFunction \
+                    response_data</code></pre>
+                    <aside class="notes">
+						<ul>
+							<li><span class="monospace">sam local invoke</span> invokes a AWS Lambda function</li>
+							<li><span class="monospace">sam local start-lambda</span> starts a AWS Lambda endpoint which allows invoking the AWS Lambda function</li>
+						</ul>
+                    </aside>
+				</section>
+				<section>
+					<h2 class="monospace">sam logs</h2>
+					<ul>
+						<li>Easy access to logs of Lambda functions</li>
+						<li>No more figuring out to which log group the data went</li>
+						<li>allows tailing and filtering of logs as well</li>
+					</ul>
+					<pre><code>$ sam logs --name YourFunction \
+           --stack-name your-stack \
+           --filter "ERROR" \
+           --tail</code></pre>
+				</section>
+				<section>
+					<h2 class="monospace">sam publish</h2>
+					<ul>
+						<li>Publishes your application to the <a href="https://aws.amazon.com/serverless/serverlessrepo/">Serverless Application Repository (SAR)</a></li>
+						<li>Allows you to provide self-service applications in your organization or publicly</li>
+					</ul>
+					<aside class="notes">
+						<ul>
+							<li>Straight forward, but
+								<ul>
+									<li>SAR needs access to the S3 bucket your code is stored in</li>
+									<li>You need to provide proper SAR-meta data in your SAM-template</li>
+									<li>You need to know where to look in the Management Console to deploy new instances of the application. Hint: in the AWS Lambda Console</li>
+								</ul>
+							</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<section>
+						<h2>Demo!</h2>
+						<img src="images/SAM.png" style="box-shadow:none;padding:1em;" width="30%">
+					</section>
+					<section>
+						<asciinema-player src="recordings/walkthrough.cast" cols="80" rows="24" font-size="medium"></asciinema-player>
+					</section>
+				</section>
+				<section id="sam-cli-slide-dupl">
+					<h2>AWS SAM CLI</h2>
+						<p><span class="monospace sam-cli-box">sam init</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam validate</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam build 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam local invoke</span><span class="monospace sam-cli-box">sam local start-api</span><span class="monospace sam-cli-box">sam local start-lambda 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam package</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam deploy</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam logs 🆕</span></p>
+						<p>↓</p>
+						<p><span class="monospace sam-cli-box">sam publish 🆕</span></p>
+					<aside class="notes">
+						<ul>
+							<li>Offers various commands</li>
+							<li>Originally just aliases for the same functionality in AWS CLI, nowadays more functionality</li>
+						</ul>
+					</aside>
+				</section>
+				<section>
+					<h2>Thanks!</h2>
+					<br/>
+					<p>Slides and code samples are available at <br /><a href="https://github.com/Dunedan/whats-new-in-squirrelland">https://github.com/Dunedan/whats-new-in-squirrelland</a>
+					</p>
+				</section>
+				<section>
+					<h2>Bonus: SAM Policy Templates</h2>
+					<ul>
+						<li>pre-defined collections of IAM permissions commonly used</li>
+						<li>resource specific</li>
+						<li>translated to IAM policies during the transformation</li>
+					</ul>
+					<pre><code class="much-code line-numbers">MyFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+    ...
+    Policies:
+      # AWS Managed IAM Policy
+      - AmazonDynamoDBFullAccess
+      # SAM Policy Template
+      - DynamoDBCrudPolicy:
+          TableName: !Ref MyTable
+      # Inline IAM Policy
+      - Statement:
+        - Action: [ "dynamodb:*" ]
+          Effect: Allow
+          Resource: !GetAtt myTable.Arn
+
+MyTable:
+  Type: AWS::Serverless::SimpleTable</code></pre>
+				<aside class="notes">
+					<ul>
+						<li>Not new, but often overlooked</li>
+					</ul>
+				</aside>
+				</section>
+				<section>
+					<h2>Links</h2>
+					<ul>
+						<li><a href="https://github.com/awslabs/serverless-application-model">Git repository of AWS SAM</li>
+						<li><a href="https://github.com/awslabs/aws-sam-cli">Git repository of AWS SAM CLI</li>
+						<li><a href="https://github.com/awslabs/aws-lambda-builders">Git repository of <span class="monospace">aws-lambda-builders</span></a> (powering the functionality of <span class="monospace">sam build</span></li>
+						<li><a href="https://docs.aws.amazon.com/de_de/serverless-application-model/latest/developerguide/serverless-sam-template-publishing-applications.html">Documentation of metadata in SAM template for <span class="monospace">sam publish</span></a></li>
+						<li><a href="https://github.com/awslabs/serverless-application-model/blob/master/docs/policy_templates.rst">SAM Policy Template documentation</a></li>
+					</ul>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			Reveal.initialize({
+				width: 1200,
+				height: 1100,
+				margin: 0.1,
+				progress: false,
+				history: true,
+				controls: true,
+				controlsTutorial: false,
+				dependencies: [
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/line-numbers/line-numbers.js', async: false}
+				]
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'sam-app
+
+  Sample SAM Template for sam-app
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Author: A little squirrel
+    Description: hello world
+    LicenseUrl: s3://whats-new-in-squirrelland/900284431863f1713e2739d3ddddd962
+    Name: squirrelland-hello-world
+    SemanticVersion: 0.0.1
+    SpdxLicenseId: MIT
+Outputs:
+  HelloWorldApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  HelloWorldFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - HelloWorldFunction
+      - Arn
+  HelloWorldFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - HelloWorldFunctionRole
+      - Arn
+Resources:
+  HelloWorldFunction:
+    Properties:
+      CodeUri: s3://whats-new-in-squirrelland/4daa4cca6158043a484cf990edb4287f
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Events:
+        HelloWorld:
+          Properties:
+            Method: get
+            Path: /hello
+          Type: Api
+      Handler: app.lambda_handler
+      Runtime: python3.7
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
